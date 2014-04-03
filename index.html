@@ -1,0 +1,133 @@
+<!-- Hey, let's be friends! http://twitter.com/pubnub -->
+
+<style>
+    #status {
+        background: #b9d1e4;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 10px;
+        color: #fff;
+        font-size: 29px;
+        font-family: "Helvetica Neue";
+        font-weight: 100;
+    }
+
+    #input {
+        padding: 10px 5px 5px 5px;
+        margin: 10px;
+        border: 0;
+        border-bottom: 1px solid #333;
+        outline: none;
+        font-size: 20px;
+        font-family: "Helvetica Neue";
+    }
+
+    #box {
+        margin: 10px;
+        font-size: 20px;
+        font-family: "Helvetica Neue";
+        font-weight: 100;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin: 1px 10px 1px 1px;
+        position: relative;
+
+        border: 2px solid rgb(255,255,255);
+        border-top-color: transparent;
+        border-radius: 100%;
+
+        -webkit-animation: spin 1s infinite linear;
+        -moz-animation: spin 1s infinite linear;
+        -ms-animation: spin 1s infinite linear;
+        -o-animation: spin 1s infinite linear;
+        animation: spin 1s infinite linear;
+    }
+     
+    @-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); } }
+    @-moz-keyframes spin { to { -moz-transform: rotate(360deg); } }
+    @-ms-keyframes spin { to { -ms-transform: rotate(360deg); } }
+    @-o-keyframes spin { to { -o-transform: rotate(360deg); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<!-- Status -->
+<div id="status">
+    <span class="spinner"></span>
+    <span id="status-message">Acquiring Your Location...</span>
+</div>
+
+<!-- Input Chat Box -->
+<input id="input" placeholder="Chat here">
+
+<!-- Output Chat Box -->
+<div id="box"></div>
+
+<script src=http://cdn.pubnub.com/pubnub.min.js></script>
+<script src=sound.js></script>
+<script>(function(){
+    var pubnub = PUBNUB({})
+    ,      box = pubnub.$('box')
+    ,    input = pubnub.$('input')
+    ,  channel = 'my_channel';
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Receive UI
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function recieve(text) {
+        // Play sound here
+        sounds.play('chat');
+
+        // Update text output here
+        box.innerHTML = safe_text(text) + '<br>' + box.innerHTML;
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Send UI
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    pubnub.bind( 'keyup', input, function(e) {
+       if ((e.keyCode || e.charCode) !== 13) return;
+       send(input.value);
+       input.value = '';
+    });
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Send & Receive Message
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function send(text) {
+        pubnub.publish({ channel : channel, message : text });
+    }
+    pubnub.subscribe({ channel : channel, message : recieve });
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Safe Text
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function safe_text(text) {
+        return (''+text).replace( /[<>]/g, '' );
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Geo Location
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function location(callback) {
+        function success(pos) { callback(pos.coords) }
+        function error(err) {
+            callback({
+                latitude  : 0.0,
+                longitude : 0.0
+            });
+        };
+
+        // Get Lat/Long
+        navigator.geolocation.getCurrentPosition( success, error, {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        } );
+    }
+
+
+})();</script>
