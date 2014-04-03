@@ -1,6 +1,10 @@
 <!-- Hey, let's be friends! http://twitter.com/pubnub -->
 
 <style>
+    #map {
+        display: inline-block;
+        margin: 10px;
+    }
     #status {
         background: #b9d1e4;
         border-radius: 6px;
@@ -60,6 +64,9 @@
     <span id="status-message">Acquiring Your Location...</span>
 </div>
 
+<!-- Map -->
+<div><img id="map" src="http://maps.googleapis.com/maps/api/staticmap?center=San+Francisco,CA&zoom=13&size=600x60&maptype=roadmap&sensor=false"></div>
+
 <!-- Input Chat Box -->
 <input id="input" placeholder="Chat here">
 
@@ -72,6 +79,7 @@
     var  pubnub = PUBNUB({})
     ,       box = pubnub.$('box')
     ,     input = pubnub.$('input')
+    ,       map = pubnub.$('map')
     , statusmsg = pubnub.$('status-message')
     ,    status = pubnub.$('status')
     ,    coords = { latitude : 0.0, longitude : 0.0 }
@@ -86,6 +94,15 @@
         statusmsg.innerHTML = pubnub.supplant(
             'Connecting to "{channel}"',
             { channel : channel }
+        );
+
+        // Map
+        map.src = pubnub.supplant(
+            'http://maps.googleapis.com/maps/api/staticmap?' +
+            'center={latitude},{longitude}&zoom=13&size=600x80' + 
+            '&markers=color:red%7Clabel:d%7C{latitude},{longitude}' +
+            '&maptype=roadmap&sensor=false',
+            pos
         );
 
         coords.latitude  = pos.latitude;
