@@ -69,15 +69,84 @@
 <script src=http://cdn.pubnub.com/pubnub.min.js></script>
 <script src=sound.js></script>
 <script>(function(){
-    var pubnub = PUBNUB({})
-    ,      box = pubnub.$('box')
-    ,    input = pubnub.$('input')
-    ,  channel = 'my_channel';
+    var  pubnub = PUBNUB({})
+    ,       box = pubnub.$('box')
+    ,     input = pubnub.$('input')
+    , statusmsg = pubnub.$('status-message')
+    ,    status = pubnub.$('status')
+    ,    coords = { latitude : 0.0, longitude : 0.0 }
+    ,   channel = 'my_channel';
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    // Receive UI
+    // Get Location
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    function recieve(text) {
+    location(function(pos){
+        console.log(geohash(pos.latitude) , geohash(pos.longitude));
+        channel = geohash(pos.latitude) + '' + geohash(pos.longitude);
+        statusmsg.innerHTML = pubnub.supplant(
+            'Connecting to "{channel}"',
+            { channel : channel }
+        );
+
+        coords.latitude  = pos.latitude;
+        coords.longitude = pos.longitude;
+
+        // Connect to Proximity Channel
+        pubnub.subscribe({
+             channel : channel,
+             message : recieve,
+             connect : ready,
+            presence : presence
+        });
+    });
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Connection Ready
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function ready(data) {
+        status.innerHTML = pubnub.supplant(
+            'Ready to chat with people near: <strong>{channel}</strong>.',
+            { channel : channel }
+        );
+
+        input.focus();
+
+        // History
+        pubnub.history({
+               limit : 100,
+             channel : channel,
+            callback : function(msgs) {
+                pubnub.each( msgs[0], printout );
+            }
+        });
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Presence
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function presence(data) {
+        printout(pubnub.supplant( 'A user {action} occured.', data ));
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Receive Data
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function recieve(data) {
+        printout(data);
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Geo Hash
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function geohash( coord, resolution ) {
+        var rez = Math.pow( 10, resolution || 1 );
+        return Math.floor(coord * rez) / rez;
+    }
+
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    // Update UI Output
+    // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    function printout(text) {
         // Play sound here
         sounds.play('chat');
 
@@ -95,12 +164,11 @@
     });
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    // Send & Receive Message
+    // Send Message
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function send(text) {
         pubnub.publish({ channel : channel, message : text });
     }
-    pubnub.subscribe({ channel : channel, message : recieve });
 
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // Safe Text
@@ -115,19 +183,15 @@
     function location(callback) {
         function success(pos) { callback(pos.coords) }
         function error(err) {
-            callback({
-                latitude  : 0.0,
-                longitude : 0.0
-            });
+            callback({ latitude : 0.0, longitude : 0.0 });
         };
 
         // Get Lat/Long
         navigator.geolocation.getCurrentPosition( success, error, {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0
+            enableHighAccuracy : true,
+                       timeout : 5000,
+                    maximumAge : 0
         } );
     }
-
 
 })();</script>
