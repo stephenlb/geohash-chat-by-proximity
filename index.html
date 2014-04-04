@@ -92,7 +92,6 @@
     // Get Location
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     location(function(pos){
-        console.log(geohash(pos.latitude) , geohash(pos.longitude));
         channel = geohash(pos.latitude) + '' + geohash(pos.longitude);
         statusmsg.innerHTML = pubnub.supplant(
             'Connecting to "{channel}"',
@@ -125,7 +124,7 @@
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function ready(data) {
         status.innerHTML = pubnub.supplant(
-            'Ready to chat with people near: <strong>{channel}</strong>.',
+            'You are chatting with people near: <strong>{channel}</strong>.',
             { channel : channel }
         );
 
@@ -159,7 +158,7 @@
     // Geo Hash
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     function geohash( coord, resolution ) {
-        var rez = Math.pow( 10, resolution || 1 );
+        var rez = Math.pow( 10, resolution || 0 );
         return Math.floor(coord * rez) / rez;
     }
 
