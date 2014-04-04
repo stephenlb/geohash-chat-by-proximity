@@ -41,6 +41,10 @@ This will create a very wide circle and generate a channel name used to connect.
 
 ![Acquired Latitude Longitude Chat Proximity Group][5]
 
+## Multiplexing 9 Boxes
+
+You will calculate the surrounding squares to extend the taper and radius in a way that provides more accuracy. This will remove the "fencing" effect.
+
 ## Geo Hashing with PubNub Conclusion
 
 That's it! You simply reduce the resolution of a geo coordinate and use that as a channel name on PubNub.  Also check out the browser's `navigator.geolocation.getCurrentPosition(...)` method to acquire lat/long in a chrome/firefox/ie/opera/mobile/safari browser.
