@@ -34,7 +34,7 @@ This will create a very wide circle and generate a channel name used to connect.
     // Connect to Proximity Channel
     pubnub.subscribe({
          channel : channel,
-         message : recieve,
+         message : receive,
          connect : ready,
         presence : presence
     });
