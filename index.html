@@ -113,7 +113,7 @@
         // Connect to Proximity Channel
         pubnub.subscribe({
              channel : channel,
-             message : recieve,
+             message : receive,
              connect : ready,
             presence : presence
         });
@@ -150,7 +150,7 @@
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     // Receive Data
     // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    function recieve(data) {
+    function receive(data) {
         printout(data);
     }
 
