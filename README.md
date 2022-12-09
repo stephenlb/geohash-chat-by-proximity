@@ -1,3 +1,10 @@
+# Geohashing Chat by Proximity UPDATED
+
+> 💡 [NEW PubNub GitHub repository for New Geo Chat](https://github.com/PubNubDevelopers/Geohashing-Chat-by-Proximity)
+
+Use the above link to find the latest Geo Powered Chat.
+Below is the older version.
+
 # Geohashing Chat by Proximity
 
 ### Try it now: [Geohash Chat by Proximity][1]
